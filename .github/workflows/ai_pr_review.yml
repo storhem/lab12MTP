@@ -1,0 +1,102 @@
+name: AI PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  ai-review:
+    name: AI Code Review
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | head -30 | tr '\n' ',')
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+          DIFF=$(git diff origin/${{ github.base_ref }}...HEAD -- '*.py' | head -c 8000)
+          echo "diff<<EOF" >> $GITHUB_OUTPUT
+          echo "$DIFF" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate AI PR Review
+        id: ai-review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          CHANGED_FILES="${{ steps.changed-files.outputs.files }}"
+          DIFF_CONTENT="${{ steps.changed-files.outputs.diff }}"
+
+          PROMPT="You are a senior Python developer reviewing a pull request for an online learning platform built with FastAPI and SQLAlchemy.
+
+          PR Title: $PR_TITLE
+          PR Description: $PR_BODY
+          Changed files: $CHANGED_FILES
+
+          Code diff (first 8000 chars):
+          $DIFF_CONTENT
+
+          Please provide a structured code review in Russian covering:
+          1. Краткое описание изменений (Brief description of changes)
+          2. Потенциальные проблемы (Potential issues)
+          3. Предложения по улучшению (Improvement suggestions)
+          4. Оценка качества кода (Code quality rating: 1-10)
+
+          Be specific and constructive."
+
+          RESPONSE=$(curl -s -X POST \
+            "https://api.anthropic.com/v1/messages" \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d "{
+              \"model\": \"claude-3-5-sonnet-20241022\",
+              \"max_tokens\": 1024,
+              \"messages\": [
+                {
+                  \"role\": \"user\",
+                  \"content\": $(echo "$PROMPT" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+                }
+              ]
+            }")
+
+          REVIEW_TEXT=$(echo "$RESPONSE" | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          if 'content' in data and data['content']:
+              print(data['content'][0]['text'])
+          else:
+              print('AI review failed: ' + str(data.get('error', 'unknown error')))
+          ")
+
+          echo "review<<EOF" >> $GITHUB_OUTPUT
+          echo "$REVIEW_TEXT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Post review comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMENT_BODY="## 🤖 AI Code Review (Claude)
+
+          ${{ steps.ai-review.outputs.review }}
+
+          ---
+          *Автоматический обзор кода с помощью Claude API*"
+
+          curl -s -X POST \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"body\": $(echo "$COMMENT_BODY" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}"
