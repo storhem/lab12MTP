@@ -11,6 +11,7 @@ from app.schemas.lesson import LessonResponse
 from app.services import auth as auth_service
 from app.services import courses as course_service
 from app.services import enrollments as enrollment_service
+from app.services import lessons as lesson_service
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
@@ -123,5 +124,4 @@ async def get_course_lessons(
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=200),
 ) -> list[LessonResponse]:
-    from app.services import lessons as lesson_service
     return await lesson_service.list_lessons(course_id, current_user, session, skip=skip, limit=limit)
