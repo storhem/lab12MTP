@@ -45,5 +45,6 @@ async def root() -> dict:
 
 
 @app.get("/health")
+@app.head("/health")
 async def health_check() -> dict:
     return {"status": "healthy"}
