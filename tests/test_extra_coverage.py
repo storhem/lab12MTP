@@ -1,14 +1,10 @@
-"""Extra tests to increase coverage of services and repositories."""
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-# --- Auth service extra coverage ---
-
 @pytest.mark.asyncio
 async def test_login_form_endpoint(test_client: AsyncClient, test_student):
-    """Test the OAuth2 form-based login endpoint."""
     response = await test_client.post(
         "/api/v1/auth/login/form",
         data={"username": test_student.email, "password": "testpassword123"},
@@ -31,11 +27,8 @@ async def test_root_endpoint(test_client: AsyncClient):
     assert "version" in response.json()
 
 
-# --- Course extra coverage ---
-
 @pytest.mark.asyncio
 async def test_list_all_courses_instructor(test_client: AsyncClient, instructor_headers):
-    """Instructor can see all courses including unpublished via /courses/all."""
     await test_client.post(
         "/api/v1/courses",
         json={"title": "Unpublished Extra", "description": "desc", "level": "beginner", "price": 0.0, "tags": ""},
@@ -84,8 +77,6 @@ async def test_course_invalid_level(test_client: AsyncClient, instructor_headers
     assert response.status_code == 422
 
 
-# --- Enrollment extra coverage ---
-
 @pytest.mark.asyncio
 async def test_enroll_nonexistent_course(test_client: AsyncClient, student_headers):
     response = await test_client.post(
@@ -98,7 +89,6 @@ async def test_enroll_nonexistent_course(test_client: AsyncClient, student_heade
 
 @pytest.mark.asyncio
 async def test_update_progress_wrong_enrollment(test_client: AsyncClient, db_session):
-    """Student cannot update another student's enrollment progress."""
     from tests.conftest import create_user_in_db, get_auth_headers
     from app.models.user import UserRole
 
@@ -138,11 +128,8 @@ async def test_update_progress_wrong_enrollment(test_client: AsyncClient, db_ses
     assert response.status_code == 403
 
 
-# --- Quiz extra coverage ---
-
 @pytest.mark.asyncio
 async def test_quiz_attempt_instructor_forbidden(test_client: AsyncClient, instructor_headers, db_session):
-    """Instructors cannot submit quiz attempts (student-only endpoint)."""
     course_resp = await test_client.post(
         "/api/v1/courses",
         json={"title": "Instr Quiz Course", "description": "desc", "level": "beginner", "price": 0.0, "tags": ""},
@@ -191,7 +178,6 @@ async def test_quiz_list_by_course(test_client: AsyncClient, instructor_headers)
 
 @pytest.mark.asyncio
 async def test_quiz_empty_questions_score(test_client: AsyncClient, instructor_headers, db_session):
-    """Quiz with no questions should give 0.0 score."""
     from tests.conftest import create_user_in_db, get_auth_headers
     from app.models.user import UserRole
 
@@ -249,20 +235,14 @@ async def test_quiz_with_lesson_id(test_client: AsyncClient, instructor_headers)
     assert quiz_resp.json()["lesson_id"] == lesson_id
 
 
-# --- Certificate verify extra coverage ---
-
 @pytest.mark.asyncio
 async def test_verify_certificate_case_sensitive(test_client: AsyncClient, db_session):
-    """Verify certificate number is case sensitive."""
     response = await test_client.get("/api/v1/certificates/cert-lowercase-12345/verify")
     assert response.status_code == 404
 
 
-# --- Repository-level testing via services ---
-
 @pytest.mark.asyncio
 async def test_update_inactive_enrollment(test_client: AsyncClient, db_session):
-    """Should not allow updating progress on inactive enrollment after re-enrolling."""
     from tests.conftest import create_user_in_db, get_auth_headers
     from app.models.user import UserRole
 
@@ -289,7 +269,6 @@ async def test_update_inactive_enrollment(test_client: AsyncClient, db_session):
     )
     enrollment_id = enroll_resp.json()["id"]
 
-    # Update progress normally
     prog_resp = await test_client.put(
         f"/api/v1/enrollments/{enrollment_id}/progress",
         json={"progress": 50.0},
@@ -300,7 +279,6 @@ async def test_update_inactive_enrollment(test_client: AsyncClient, db_session):
 
 @pytest.mark.asyncio
 async def test_instructor_can_see_unpublished_lessons(test_client: AsyncClient, instructor_headers):
-    """Instructor sees all lessons including unpublished."""
     course_resp = await test_client.post(
         "/api/v1/courses",
         json={"title": "Instr Lessons Course", "description": "desc", "level": "beginner", "price": 0.0, "tags": ""},
@@ -308,7 +286,6 @@ async def test_instructor_can_see_unpublished_lessons(test_client: AsyncClient, 
     )
     course_id = course_resp.json()["id"]
 
-    # Add a published and an unpublished lesson
     await test_client.post(
         f"/api/v1/lessons/course/{course_id}",
         json={"title": "Published", "content": "...", "order_num": 1, "duration_minutes": 10, "is_published": True},
@@ -332,7 +309,6 @@ async def test_instructor_can_see_unpublished_lessons(test_client: AsyncClient, 
 
 @pytest.mark.asyncio
 async def test_student_only_sees_published_lessons(test_client: AsyncClient, instructor_headers, db_session):
-    """Student sees only published lessons."""
     from tests.conftest import create_user_in_db, get_auth_headers
     from app.models.user import UserRole
 

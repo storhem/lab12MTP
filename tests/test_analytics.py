@@ -8,7 +8,6 @@ def uid() -> str:
 
 
 async def setup_data(client: AsyncClient, db_session) -> tuple:
-    """Create instructor, student, admin, course, enrollment with progress."""
     from tests.conftest import create_user_in_db, get_auth_headers
     from app.models.user import UserRole
 

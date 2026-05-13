@@ -1,4 +1,3 @@
-"""Edge case tests to cover remaining uncovered lines."""
 import uuid
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -48,24 +47,20 @@ async def make_published_course(instructor, db_session: AsyncSession, s: str):
 
 @pytest.mark.asyncio
 async def test_reenroll_inactive_enrollment(db_session: AsyncSession):
-    """Re-enrolling in a course where enrollment is inactive should reactivate it."""
     s = uid()
     instructor = await make_instructor(db_session, s)
     student = await make_student(db_session, s)
     course = await make_published_course(instructor, db_session, s)
 
-    # Enroll
     enrollment = await enrollment_service.enroll_student(course.id, student, db_session)
     assert enrollment.is_active is True
 
-    # Manually deactivate
     enrollment.is_active = False
     db_session.add(enrollment)
     await db_session.commit()
     await db_session.refresh(enrollment)
     assert enrollment.is_active is False
 
-    # Re-enroll — should reactivate
     re_enrollment = await enrollment_service.enroll_student(course.id, student, db_session)
     assert re_enrollment.is_active is True
     assert re_enrollment.progress == 0.0
@@ -74,7 +69,6 @@ async def test_reenroll_inactive_enrollment(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_quiz_service_update_forbidden(db_session: AsyncSession):
-    """Other instructor cannot update quiz."""
     from fastapi import HTTPException
     s = uid()
     instructor = await make_instructor(db_session, s)
@@ -103,7 +97,6 @@ async def test_quiz_service_update_forbidden(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_quiz_service_delete_forbidden(db_session: AsyncSession):
-    """Other instructor cannot delete quiz."""
     from fastapi import HTTPException
     s = uid()
     instructor = await make_instructor(db_session, s)
@@ -131,7 +124,6 @@ async def test_quiz_service_delete_forbidden(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_quiz_service_create_forbidden_for_other_instructor(db_session: AsyncSession):
-    """Instructor cannot create quiz for another instructor's course."""
     from fastapi import HTTPException
     s = uid()
     instructor = await make_instructor(db_session, s)
@@ -157,7 +149,6 @@ async def test_quiz_service_create_forbidden_for_other_instructor(db_session: As
 
 @pytest.mark.asyncio
 async def test_lesson_service_update_forbidden(db_session: AsyncSession):
-    """Other instructor cannot update lesson."""
     from fastapi import HTTPException
     s = uid()
     instructor = await make_instructor(db_session, s)
@@ -188,7 +179,6 @@ async def test_lesson_service_update_forbidden(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_lesson_service_delete_forbidden(db_session: AsyncSession):
-    """Other instructor cannot delete lesson."""
     from fastapi import HTTPException
     s = uid()
     instructor = await make_instructor(db_session, s)
@@ -217,7 +207,6 @@ async def test_lesson_service_delete_forbidden(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_repository_get_multi_with_filters(db_session: AsyncSession):
-    """Test BaseRepository.get_multi with filters."""
     from app.repositories.user import UserRepository
     s = uid()
     await auth_service.register(
@@ -233,7 +222,6 @@ async def test_repository_get_multi_with_filters(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_repository_count(db_session: AsyncSession):
-    """Test BaseRepository.count method."""
     from app.repositories.user import UserRepository
     repo = UserRepository(db_session)
     count = await repo.count()
@@ -243,7 +231,6 @@ async def test_repository_count(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_user_repository_get_active_users(db_session: AsyncSession):
-    """Test UserRepository.get_active_users."""
     from app.repositories.user import UserRepository
     s = uid()
     await auth_service.register(
@@ -259,7 +246,6 @@ async def test_user_repository_get_active_users(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_course_repository_list_by_instructor(db_session: AsyncSession):
-    """Test CourseRepository.get_by_instructor."""
     s = uid()
     instructor = await make_instructor(db_session, s)
     await course_service.create_course(
@@ -274,7 +260,6 @@ async def test_course_repository_list_by_instructor(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_quiz_attempt_repository_get_by_student(db_session: AsyncSession):
-    """Test QuizAttemptRepository.get_by_student."""
     from app.repositories.quiz import QuizAttemptRepository
     s = uid()
     instructor = await make_instructor(db_session, s)
@@ -301,7 +286,6 @@ async def test_quiz_attempt_repository_get_by_student(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_enrollment_update_progress_inactive_fails(db_session: AsyncSession):
-    """Updating progress on inactive enrollment should fail."""
     from fastapi import HTTPException
     s = uid()
     instructor = await make_instructor(db_session, s)
@@ -310,7 +294,6 @@ async def test_enrollment_update_progress_inactive_fails(db_session: AsyncSessio
 
     enrollment = await enrollment_service.enroll_student(course.id, student, db_session)
 
-    # Deactivate enrollment
     enrollment.is_active = False
     db_session.add(enrollment)
     await db_session.commit()
