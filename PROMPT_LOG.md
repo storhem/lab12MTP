@@ -923,6 +923,160 @@ TOTAL                                818     11    99%
 
 ---
 
+---
+
+## Задание В2 (доп.) — Финальный code review и устранение CI-ошибок
+
+### Промпт 2.7 — Полный code review перед сдачей
+
+**Инструмент:** Claude Code  
+**Дата:** 13.05.2026
+
+**Промпт:**
+```
+Проведи полный и строгий code review всего репозитория.
+Проверь: корректность бизнес-логики, безопасность (RBAC, JWT, валидация),
+REST-конвенции (статус-коды, HTTP-методы), качество кода (type hints, PEP8,
+дублирование), тесты (изолированность, граничные случаи, покрытие),
+инфраструктуру (Docker, CI/CD, .gitignore).
+
+Для каждой проблемы: файл:строка, описание, текущий код, исправление.
+Severity: КРИТИЧНО / ВАЖНО / МИНОР.
+В конце — сводная таблица и вывод: можно ли сдавать.
+```
+
+**Результат ИИ:** Найдено 25 проблем (3 критичных, 6 важных, 16 минорных).
+
+Критичные:
+- `services/lessons.py:51` — вычисленный `order_num` не используется в `create()`, всегда передаётся `lesson_data.order_num`
+- `main.py:23` — `allow_origins=["*"]` + `allow_credentials=True` — запрещённая браузерами комбинация CORS
+- `tests/conftest.py` — SQLite in-memory без `StaticPool` (выявлено позже через CI)
+
+Важные:
+- `services/courses.py` — при фильтрации по `instructor_id` игнорировался `published_only`
+- `tests/test_courses.py:109` — хардкодный `email="otherinstructor@test.com"` без UUID-суффикса
+- `api/v1/analytics.py:29` — `from fastapi import HTTPException, status` внутри тела функции
+
+**Итого промпт 2.7:**
+- Количество итераций: 1
+- Что исправлял вручную: ничего
+- Время: ~20 мин
+
+---
+
+### Промпт 2.8 — Диагностика провала CI: SQLite StaticPool
+
+**Инструмент:** Claude Code  
+**Дата:** 13.05.2026
+
+**Контекст:** После пуша CI упал на шаге "Run tests with coverage". Локально все 119 тестов проходят.
+
+**Промпт:**
+```
+GitHub Actions CI падает на шаге "Run tests with coverage" (exit code 1).
+Локально — 119 passed. CI: ubuntu-latest, Python 3.11. Локально: Windows 11, Python 3.13.
+Проверь conftest.py, в частности настройку test_engine для SQLite in-memory.
+```
+
+**Результат ИИ:**
+```
+Корневая причина: test_engine создан без StaticPool.
+
+С SQLite :memory: каждое новое соединение получает свою пустую БД.
+setup_database() создаёт таблицы через соединение A, возвращает его в пул.
+На Linux QueuePool выдаёт новое соединение B для db_session() — таблиц нет.
+
+Исправление:
+from sqlalchemy.pool import StaticPool
+
+test_engine = create_async_engine(
+    TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+```
+
+**Результат:** `119 passed`. CI снова упал — следующая ошибка.
+
+**Итого промпт 2.8:**
+- Количество итераций: 1
+- Что исправлял вручную: ничего
+- Время: ~10 мин
+
+---
+
+### Промпт 2.9 — Диагностика второго провала CI: passlib + bcrypt несовместимость
+
+**Инструмент:** Claude Code  
+**Дата:** 13.05.2026
+
+**Контекст:** После фикса StaticPool CI снова упал. В логах:
+
+```
+ValueError: password cannot be longer than 72 bytes,
+truncate manually if necessary
+
+passlib/handlers/bcrypt.py:380: in detect_wrap_bug
+    if verify(secret, bug_hash):
+
+AttributeError: module 'bcrypt' has no attribute '__about__'
+```
+
+**Промпт:**
+```
+CI падает при попытке захешировать пароль через passlib bcrypt.
+Traceback указывает на detect_wrap_bug() в passlib — функцию,
+которая при инициализации бэкенда тестирует хеширование длинного пароля.
+Новый bcrypt 4.1+ отвергает пароли > 72 байт с ValueError.
+Локально стоит bcrypt==4.0.1, в CI ставится последний (4.3.x).
+
+Как зафиксировать совместимую версию?
+```
+
+**Диагноз ИИ:**
+```
+passlib 1.7.4 не поддерживает bcrypt 4.1+. В 4.1.0 добавили
+strict enforcement лимита 72 байт, а detect_wrap_bug() в passlib
+специально хеширует 120-байтовый пароль для проверки wrap-бага
+(исторический баг старых реализаций bcrypt).
+
+Проблема не в нашем коде, а в том, что pip в CI ставит latest bcrypt.
+passlib[bcrypt] не пинит версию, поэтому берётся 4.3.x.
+
+Исправление — явно зафиксировать совместимую версию в pyproject.toml:
+"bcrypt==4.0.1"  # последняя версия без строгого 72-байтового лимита
+```
+
+**Что пришлось разобраться самостоятельно:** почему ошибка не воспроизводится локально — `bcrypt==4.0.1` уже был установлен глобально, поэтому pip не переустанавливал его. В CI чистое окружение → ставится latest.
+
+**Результат после фикса:** `119 passed`, CI зелёный.
+
+**Итого промпт 2.9:**
+- Количество итераций: 1
+- Самостоятельно разобрался: почему ошибка не воспроизводилась локально
+- Время: ~15 мин
+
+---
+
+### Итого по блоку В2 (финальная сводка)
+
+| Проблема | Severity | Файл | Статус |
+|---|---|---|---|
+| `order_num` не используется в `create()` | Критично | `services/lessons.py` | Исправлено |
+| CORS: `allow_origins=*` + `allow_credentials=True` | Критично | `main.py` | Исправлено |
+| SQLite in-memory без `StaticPool` → CI падает на Linux | Критично | `tests/conftest.py` | Исправлено |
+| `instructor_id` фильтр игнорировал `published_only` | Важно | `services/courses.py` | Исправлено ранее |
+| Хардкодный email в тесте — UNIQUE constraint при повторе | Важно | `tests/test_courses.py` | Исправлено |
+| Inline import `HTTPException` внутри функции | Важно | `api/v1/analytics.py` | Исправлено |
+| passlib 1.7.4 несовместим с bcrypt 4.1+ | Критично | `pyproject.toml` | Исправлено |
+
+- **Всего найдено:** 7 значимых проблем
+- **Исправлено:** 7
+- **Метод:** AI-ассистированный code review + AI-диагностика CI-ошибок
+- **Время:** ~45 мин
+
+---
+
 ## Общие наблюдения
 
 ### Что работало хорошо
@@ -935,6 +1089,11 @@ TOTAL                                818     11    99%
 - Настройка pytest-asyncio event loop — потребовалось 3 итерации
 - RBAC (role-based access control) — admin bypass не был добавлен сразу
 - Idempotency (сертификаты) — пришлось явно описать проблему race condition
+
+### Платформенные ловушки (не очевидно из кода)
+- SQLite in-memory без `StaticPool` — тесты проходят на Windows, падают на Linux
+- `passlib[bcrypt]` без пина версии — на Windows уже стоит старый bcrypt, в CI ставится несовместимый новый
+- Такие проблемы не выявляются локально и требуют CI для обнаружения
 
 ### Рекомендации по промптингу
 - Давать точную спецификацию полей и типов, а не общее описание
