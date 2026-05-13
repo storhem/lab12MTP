@@ -102,12 +102,13 @@ async def test_update_course_other_instructor_forbidden(
     )
     course_id = create_resp.json()["id"]
 
-    from tests.conftest import create_user_in_db, get_auth_headers
+    from tests.conftest import _unique_suffix, create_user_in_db, get_auth_headers
     from app.models.user import UserRole
+    uid = _unique_suffix()
     other_instructor = await create_user_in_db(
         db_session,
-        email="otherinstructor@test.com",
-        username="otherinstructor",
+        email=f"otherinstructor_{uid}@test.com",
+        username=f"otherinstructor_{uid}",
         full_name="Other Instructor",
         role=UserRole.instructor,
     )

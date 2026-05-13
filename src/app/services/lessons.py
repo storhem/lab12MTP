@@ -48,7 +48,7 @@ async def add_lesson(
         course_id=course_id,
         title=lesson_data.title,
         content=lesson_data.content,
-        order_num=lesson_data.order_num,
+        order_num=order_num,
         duration_minutes=lesson_data.duration_minutes,
         is_published=lesson_data.is_published,
     )

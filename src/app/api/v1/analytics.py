@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
@@ -26,7 +26,6 @@ async def get_student_progress(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict:
     if current_user.role != UserRole.admin and current_user.id != student_id:
-        from fastapi import HTTPException, status
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to view this student's progress",
