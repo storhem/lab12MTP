@@ -1,4 +1,3 @@
-"""Direct unit tests for services to boost code coverage."""
 import uuid
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -322,7 +321,6 @@ async def test_enrollment_service_full_flow(db_session: AsyncSession):
     enrollment = await enrollment_service.update_progress(enrollment.id, 100.0, student, db_session)
     assert enrollment.completed_at is not None
 
-    # Certificate auto-issued
     from app.repositories.certificate import CertificateRepository
     cert_repo = CertificateRepository(db_session)
     certs = await cert_repo.get_by_student(student.id)
@@ -391,12 +389,10 @@ async def test_quiz_service_full_flow(db_session: AsyncSession):
     fetched = await quiz_service.get_quiz(quiz.id, db_session)
     assert fetched.id == quiz.id
 
-    # Submit passing attempt
     attempt = await quiz_service.submit_attempt(quiz.id, ["4", "blue"], student, db_session)
     assert attempt.passed is True
     assert attempt.score == 100.0
 
-    # Submit failing attempt
     attempt2 = await quiz_service.submit_attempt(quiz.id, ["3", "red"], student, db_session)
     assert attempt2.passed is False
     assert attempt2.score == 0.0

@@ -18,9 +18,6 @@ def _make_session_factory(engine):
     return async_sessionmaker(engine, expire_on_commit=False)
 
 
-# These are module-level but engine creation is deferred via a factory pattern;
-# the actual objects are created here but can be replaced in tests via
-# app.dependency_overrides[get_session].
 engine = _make_engine()
 async_session_factory = _make_session_factory(engine)
 

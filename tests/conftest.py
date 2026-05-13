@@ -3,7 +3,6 @@ import uuid
 from collections.abc import AsyncGenerator
 from typing import Any
 
-# Override DATABASE_URL before any app imports so create_async_engine uses SQLite
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 import pytest
