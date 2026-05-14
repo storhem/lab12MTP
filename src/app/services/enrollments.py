@@ -98,13 +98,19 @@ async def issue_certificate(enrollment: Enrollment, session: AsyncSession) -> Ce
     return certificate
 
 
-async def get_course_students(course_id: int, session: AsyncSession) -> list[Enrollment]:
+async def get_course_students(course_id: int, current_user: User, session: AsyncSession) -> list[Enrollment]:
+    from app.models.user import UserRole
     course_repo = CourseRepository(session)
     course = await course_repo.get(course_id)
     if not course:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Course not found",
+        )
+    if current_user.role != UserRole.admin and course.instructor_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to view students of this course",
         )
     enrollment_repo = EnrollmentRepository(session)
     return await enrollment_repo.get_by_course(course_id)

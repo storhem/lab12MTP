@@ -37,8 +37,7 @@ class BaseRepository(Generic[ModelType]):
 
     async def update(self, obj: ModelType, **kwargs: Any) -> ModelType:
         for key, value in kwargs.items():
-            if value is not None or key in kwargs:
-                setattr(obj, key, value)
+            setattr(obj, key, value)
         self.session.add(obj)
         await self.session.commit()
         await self.session.refresh(obj)

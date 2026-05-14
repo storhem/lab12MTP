@@ -113,7 +113,7 @@ async def get_course_students(
     current_user: Annotated[User, Depends(auth_service.get_current_active_user)],
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> list[EnrollmentResponse]:
-    return await enrollment_service.get_course_students(course_id, session)
+    return await enrollment_service.get_course_students(course_id, current_user, session)
 
 
 @router.get("/{course_id}/lessons", response_model=list[LessonResponse])
