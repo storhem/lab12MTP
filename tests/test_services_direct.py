@@ -485,10 +485,10 @@ async def test_analytics_service(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_enrollment_get_course_students_not_found(db_session: AsyncSession):
+async def test_enrollment_get_course_students_not_found(db_session: AsyncSession, test_admin):
     from fastapi import HTTPException
     with pytest.raises(HTTPException) as exc_info:
-        await enrollment_service.get_course_students(999999, db_session)
+        await enrollment_service.get_course_students(999999, test_admin, db_session)
     assert exc_info.value.status_code == 404
 
 
