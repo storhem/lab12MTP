@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "changeme-in-production-use-long-random-string"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ALLOWED_ORIGINS: list[str] = ["*"]
 
 
 settings = Settings()

@@ -11,13 +11,22 @@ class CourseRepository(BaseRepository[Course]):
 
     async def get_published(self, skip: int = 0, limit: int = 100) -> list[Course]:
         result = await self.session.execute(
-            select(Course).where(Course.is_published == True).offset(skip).limit(limit)
+            select(Course).where(Course.is_published.is_(True)).offset(skip).limit(limit)
         )
         return list(result.scalars().all())
 
     async def get_by_instructor(self, instructor_id: int, skip: int = 0, limit: int = 100) -> list[Course]:
         result = await self.session.execute(
             select(Course).where(Course.instructor_id == instructor_id).offset(skip).limit(limit)
+        )
+        return list(result.scalars().all())
+
+    async def get_by_instructor_published(self, instructor_id: int, skip: int = 0, limit: int = 100) -> list[Course]:
+        result = await self.session.execute(
+            select(Course)
+            .where(Course.instructor_id == instructor_id, Course.is_published.is_(True))
+            .offset(skip)
+            .limit(limit)
         )
         return list(result.scalars().all())
 

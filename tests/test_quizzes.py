@@ -1,6 +1,9 @@
 import pytest
 from httpx import AsyncClient
 
+from app.models.user import UserRole
+from tests.conftest import create_user_in_db, get_auth_headers
+
 
 QUESTIONS = [
     {
@@ -99,8 +102,7 @@ async def test_get_quiz_not_found(test_client: AsyncClient, instructor_headers):
 
 @pytest.mark.asyncio
 async def test_submit_attempt_passing(test_client: AsyncClient, instructor_headers, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     _, quiz_id = await create_course_and_quiz(test_client, instructor_headers)
 
     student = await create_user_in_db(
@@ -122,8 +124,7 @@ async def test_submit_attempt_passing(test_client: AsyncClient, instructor_heade
 
 @pytest.mark.asyncio
 async def test_submit_attempt_failing(test_client: AsyncClient, instructor_headers, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     _, quiz_id = await create_course_and_quiz(test_client, instructor_headers)
 
     student = await create_user_in_db(
@@ -145,8 +146,7 @@ async def test_submit_attempt_failing(test_client: AsyncClient, instructor_heade
 
 @pytest.mark.asyncio
 async def test_submit_attempt_partial_score(test_client: AsyncClient, instructor_headers, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     _, quiz_id = await create_course_and_quiz(test_client, instructor_headers)
 
     student = await create_user_in_db(
@@ -168,8 +168,7 @@ async def test_submit_attempt_partial_score(test_client: AsyncClient, instructor
 
 @pytest.mark.asyncio
 async def test_get_attempt_results(test_client: AsyncClient, instructor_headers, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     _, quiz_id = await create_course_and_quiz(test_client, instructor_headers)
 
     student = await create_user_in_db(

@@ -1,6 +1,9 @@
 import pytest
 from httpx import AsyncClient
 
+from app.models.user import UserRole
+from tests.conftest import create_user_in_db, get_auth_headers
+
 
 async def create_published_course(client: AsyncClient, instructor_headers: dict) -> int:
     resp = await client.post(
@@ -23,8 +26,7 @@ async def create_published_course(client: AsyncClient, instructor_headers: dict)
 async def test_enroll_in_published_course(
     test_client: AsyncClient, student_headers, instructor_headers, db_session
 ):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     instr = await create_user_in_db(
         db_session, "enroll_instr@test.com", "enroll_instr", "Enroll Instructor", UserRole.instructor
     )
@@ -52,8 +54,7 @@ async def test_enroll_in_published_course(
 async def test_enroll_in_unpublished_course(
     test_client: AsyncClient, db_session
 ):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     instr = await create_user_in_db(
         db_session, "unpub_instr@test.com", "unpub_instr", "Unpub Instr", UserRole.instructor
     )
@@ -81,8 +82,7 @@ async def test_enroll_in_unpublished_course(
 
 @pytest.mark.asyncio
 async def test_duplicate_enrollment(test_client: AsyncClient, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     instr = await create_user_in_db(
         db_session, "dup_instr@test.com", "dup_instr", "Dup Instr", UserRole.instructor
     )
@@ -106,8 +106,7 @@ async def test_duplicate_enrollment(test_client: AsyncClient, db_session):
 
 @pytest.mark.asyncio
 async def test_get_my_enrollments(test_client: AsyncClient, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     instr = await create_user_in_db(
         db_session, "my_enroll_instr@test.com", "my_enroll_instr", "MyEnroll Instr", UserRole.instructor
     )
@@ -130,8 +129,7 @@ async def test_get_my_enrollments(test_client: AsyncClient, db_session):
 
 @pytest.mark.asyncio
 async def test_update_progress(test_client: AsyncClient, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     instr = await create_user_in_db(
         db_session, "prog_instr@test.com", "prog_instr", "Prog Instr", UserRole.instructor
     )
@@ -159,8 +157,7 @@ async def test_update_progress(test_client: AsyncClient, db_session):
 
 @pytest.mark.asyncio
 async def test_complete_course_issues_certificate(test_client: AsyncClient, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     instr = await create_user_in_db(
         db_session, "comp_instr@test.com", "comp_instr", "Comp Instr", UserRole.instructor
     )
@@ -194,8 +191,7 @@ async def test_complete_course_issues_certificate(test_client: AsyncClient, db_s
 
 @pytest.mark.asyncio
 async def test_progress_out_of_range(test_client: AsyncClient, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+
     instr = await create_user_in_db(
         db_session, "range_instr@test.com", "range_instr", "Range Instr", UserRole.instructor
     )

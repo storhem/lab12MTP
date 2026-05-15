@@ -1,26 +1,18 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import auth, courses, enrollments, lessons, quizzes, certificates, analytics
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    yield
-
+from app.core.config import settings
 
 app = FastAPI(
     title="Online Learning Platform",
     description="Платформа онлайн-обучения — API для управления курсами, уроками, тестами и сертификатами",
     version="0.1.0",
-    lifespan=lifespan,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

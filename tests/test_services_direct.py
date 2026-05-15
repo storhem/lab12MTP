@@ -192,12 +192,12 @@ async def test_courses_service_update_forbidden(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"f_instr_{s}@test.com", username=f"f_instr_{s}",
-                   full_name="F Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="F Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     other = await auth_service.register(
         UserCreate(email=f"f_other_{s}@test.com", username=f"f_other_{s}",
-                   full_name="F Other", role=UserRole.instructor, password="pass123"),
+                   full_name="F Other", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     course = await course_service.create_course(
@@ -214,7 +214,7 @@ async def test_courses_service_delete(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"del_instr_{s}@test.com", username=f"del_instr_{s}",
-                   full_name="Del Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="Del Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     course = await course_service.create_course(
@@ -234,7 +234,7 @@ async def test_lessons_service_add_list_update_delete(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"l_instr_{s}@test.com", username=f"l_instr_{s}",
-                   full_name="L Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="L Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     course = await course_service.create_course(
@@ -274,7 +274,7 @@ async def test_lessons_service_add_to_nonexistent_course(db_session: AsyncSessio
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"lne_instr_{s}@test.com", username=f"lne_instr_{s}",
-                   full_name="LNE Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="LNE Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     with pytest.raises(HTTPException) as exc_info:
@@ -291,12 +291,12 @@ async def test_enrollment_service_full_flow(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"e_instr_{s}@test.com", username=f"e_instr_{s}",
-                   full_name="E Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="E Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     student = await auth_service.register(
         UserCreate(email=f"e_stu_{s}@test.com", username=f"e_stu_{s}",
-                   full_name="E Student", role=UserRole.student, password="pass123"),
+                   full_name="E Student", role=UserRole.student, password="pass1234"),
         db_session,
     )
 
@@ -334,12 +334,12 @@ async def test_enrollment_enroll_duplicate(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"dup_e_instr_{s}@test.com", username=f"dup_e_instr_{s}",
-                   full_name="Dup E Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="Dup E Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     student = await auth_service.register(
         UserCreate(email=f"dup_e_stu_{s}@test.com", username=f"dup_e_stu_{s}",
-                   full_name="Dup E Stu", role=UserRole.student, password="pass123"),
+                   full_name="Dup E Stu", role=UserRole.student, password="pass1234"),
         db_session,
     )
     course = await course_service.create_course(
@@ -360,12 +360,12 @@ async def test_quiz_service_full_flow(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"q_instr_{s}@test.com", username=f"q_instr_{s}",
-                   full_name="Q Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="Q Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     student = await auth_service.register(
         UserCreate(email=f"q_stu_{s}@test.com", username=f"q_stu_{s}",
-                   full_name="Q Stu", role=UserRole.student, password="pass123"),
+                   full_name="Q Stu", role=UserRole.student, password="pass1234"),
         db_session,
     )
     course = await course_service.create_course(
@@ -419,12 +419,12 @@ async def test_certificate_service(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"cert_svc_instr_{s}@test.com", username=f"cert_svc_instr_{s}",
-                   full_name="Cert Svc Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="Cert Svc Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     student = await auth_service.register(
         UserCreate(email=f"cert_svc_stu_{s}@test.com", username=f"cert_svc_stu_{s}",
-                   full_name="Cert Svc Student", role=UserRole.student, password="pass123"),
+                   full_name="Cert Svc Student", role=UserRole.student, password="pass1234"),
         db_session,
     )
     course = await course_service.create_course(
@@ -454,12 +454,12 @@ async def test_analytics_service(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"an_svc_instr_{s}@test.com", username=f"an_svc_instr_{s}",
-                   full_name="An Svc Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="An Svc Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     student = await auth_service.register(
         UserCreate(email=f"an_svc_stu_{s}@test.com", username=f"an_svc_stu_{s}",
-                   full_name="An Svc Stu", role=UserRole.student, password="pass123"),
+                   full_name="An Svc Stu", role=UserRole.student, password="pass1234"),
         db_session,
     )
     course = await course_service.create_course(
@@ -498,7 +498,7 @@ async def test_enrollment_update_progress_not_found(db_session: AsyncSession):
     s = uid()
     student = await auth_service.register(
         UserCreate(email=f"prog_nf_{s}@test.com", username=f"prog_nf_{s}",
-                   full_name="Prog NF", role=UserRole.student, password="pass123"),
+                   full_name="Prog NF", role=UserRole.student, password="pass1234"),
         db_session,
     )
     with pytest.raises(HTTPException) as exc_info:
@@ -511,12 +511,12 @@ async def test_lesson_service_student_sees_only_published(db_session: AsyncSessi
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"ls_instr_{s}@test.com", username=f"ls_instr_{s}",
-                   full_name="LS Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="LS Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     student = await auth_service.register(
         UserCreate(email=f"ls_stu_{s}@test.com", username=f"ls_stu_{s}",
-                   full_name="LS Stu", role=UserRole.student, password="pass123"),
+                   full_name="LS Stu", role=UserRole.student, password="pass1234"),
         db_session,
     )
     course = await course_service.create_course(
@@ -552,7 +552,7 @@ async def test_quiz_service_nonexistent_course(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"qnc_instr_{s}@test.com", username=f"qnc_instr_{s}",
-                   full_name="QNC Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="QNC Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     with pytest.raises(HTTPException) as exc_info:
@@ -569,12 +569,12 @@ async def test_courses_service_delete_forbidden(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"delf_instr_{s}@test.com", username=f"delf_instr_{s}",
-                   full_name="DelF Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="DelF Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     other = await auth_service.register(
         UserCreate(email=f"delf_other_{s}@test.com", username=f"delf_other_{s}",
-                   full_name="DelF Other", role=UserRole.instructor, password="pass123"),
+                   full_name="DelF Other", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     course = await course_service.create_course(
@@ -592,12 +592,12 @@ async def test_courses_service_publish_forbidden(db_session: AsyncSession):
     s = uid()
     instructor = await auth_service.register(
         UserCreate(email=f"pubf_instr_{s}@test.com", username=f"pubf_instr_{s}",
-                   full_name="PubF Instr", role=UserRole.instructor, password="pass123"),
+                   full_name="PubF Instr", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     other = await auth_service.register(
         UserCreate(email=f"pubf_other_{s}@test.com", username=f"pubf_other_{s}",
-                   full_name="PubF Other", role=UserRole.instructor, password="pass123"),
+                   full_name="PubF Other", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
     course = await course_service.create_course(

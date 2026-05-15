@@ -25,14 +25,13 @@ async def list_courses(
     limit: int = 100,
     published_only: bool = True,
     instructor_id: int | None = None,
-    session: AsyncSession = None,
+    session: AsyncSession | None = None,
 ) -> list[Course]:
     repo = CourseRepository(session)
     if instructor_id is not None:
-        courses = await repo.get_by_instructor(instructor_id, skip=skip, limit=limit)
         if published_only:
-            courses = [c for c in courses if c.is_published]
-        return courses
+            return await repo.get_by_instructor_published(instructor_id, skip=skip, limit=limit)
+        return await repo.get_by_instructor(instructor_id, skip=skip, limit=limit)
     if published_only:
         return await repo.get_published(skip=skip, limit=limit)
     return await repo.get_multi(skip=skip, limit=limit)

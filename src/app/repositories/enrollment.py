@@ -14,7 +14,7 @@ class EnrollmentRepository(BaseRepository[Enrollment]):
     async def get_by_student(self, student_id: int, skip: int = 0, limit: int = 100) -> list[Enrollment]:
         result = await self.session.execute(
             select(Enrollment)
-            .where(Enrollment.student_id == student_id, Enrollment.is_active == True)
+            .where(Enrollment.student_id == student_id, Enrollment.is_active.is_(True))
             .offset(skip)
             .limit(limit)
         )
@@ -23,7 +23,7 @@ class EnrollmentRepository(BaseRepository[Enrollment]):
     async def get_by_course(self, course_id: int, skip: int = 0, limit: int = 100) -> list[Enrollment]:
         result = await self.session.execute(
             select(Enrollment)
-            .where(Enrollment.course_id == course_id, Enrollment.is_active == True)
+            .where(Enrollment.course_id == course_id, Enrollment.is_active.is_(True))
             .offset(skip)
             .limit(limit)
         )

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.certificate import Certificate
 from app.models.enrollment import Enrollment
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.repositories.certificate import CertificateRepository
 from app.repositories.course import CourseRepository
 from app.repositories.enrollment import EnrollmentRepository
@@ -99,7 +99,6 @@ async def issue_certificate(enrollment: Enrollment, session: AsyncSession) -> Ce
 
 
 async def get_course_students(course_id: int, current_user: User, session: AsyncSession) -> list[Enrollment]:
-    from app.models.user import UserRole
     course_repo = CourseRepository(session)
     course = await course_repo.get(course_id)
     if not course:

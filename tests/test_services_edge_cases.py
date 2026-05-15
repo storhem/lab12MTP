@@ -23,7 +23,7 @@ def uid() -> str:
 async def make_instructor(db_session: AsyncSession, s: str):
     return await auth_service.register(
         UserCreate(email=f"ec_instr_{s}@test.com", username=f"ec_instr_{s}",
-                   full_name="EC Instructor", role=UserRole.instructor, password="pass123"),
+                   full_name="EC Instructor", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
 
@@ -31,7 +31,7 @@ async def make_instructor(db_session: AsyncSession, s: str):
 async def make_student(db_session: AsyncSession, s: str):
     return await auth_service.register(
         UserCreate(email=f"ec_stu_{s}@test.com", username=f"ec_stu_{s}",
-                   full_name="EC Student", role=UserRole.student, password="pass123"),
+                   full_name="EC Student", role=UserRole.student, password="pass1234"),
         db_session,
     )
 
@@ -75,7 +75,7 @@ async def test_quiz_service_update_forbidden(db_session: AsyncSession):
     s2 = uid()
     other_instr = await auth_service.register(
         UserCreate(email=f"other_qi_{s2}@test.com", username=f"other_qi_{s2}",
-                   full_name="Other QI", role=UserRole.instructor, password="pass123"),
+                   full_name="Other QI", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
 
@@ -103,7 +103,7 @@ async def test_quiz_service_delete_forbidden(db_session: AsyncSession):
     s2 = uid()
     other_instr = await auth_service.register(
         UserCreate(email=f"del_qi_{s2}@test.com", username=f"del_qi_{s2}",
-                   full_name="Del QI", role=UserRole.instructor, password="pass123"),
+                   full_name="Del QI", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
 
@@ -130,7 +130,7 @@ async def test_quiz_service_create_forbidden_for_other_instructor(db_session: As
     s2 = uid()
     other_instr = await auth_service.register(
         UserCreate(email=f"cquiz_other_{s2}@test.com", username=f"cquiz_other_{s2}",
-                   full_name="CQuiz Other", role=UserRole.instructor, password="pass123"),
+                   full_name="CQuiz Other", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
 
@@ -155,7 +155,7 @@ async def test_lesson_service_update_forbidden(db_session: AsyncSession):
     s2 = uid()
     other_instr = await auth_service.register(
         UserCreate(email=f"lupd_other_{s2}@test.com", username=f"lupd_other_{s2}",
-                   full_name="LUpd Other", role=UserRole.instructor, password="pass123"),
+                   full_name="LUpd Other", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
 
@@ -185,7 +185,7 @@ async def test_lesson_service_delete_forbidden(db_session: AsyncSession):
     s2 = uid()
     other_instr = await auth_service.register(
         UserCreate(email=f"ldel_other_{s2}@test.com", username=f"ldel_other_{s2}",
-                   full_name="LDel Other", role=UserRole.instructor, password="pass123"),
+                   full_name="LDel Other", role=UserRole.instructor, password="pass1234"),
         db_session,
     )
 
@@ -211,7 +211,7 @@ async def test_repository_get_multi_with_filters(db_session: AsyncSession):
     s = uid()
     await auth_service.register(
         UserCreate(email=f"filt1_{s}@test.com", username=f"filt1_{s}",
-                   full_name="Filt1", role=UserRole.student, password="pass123"),
+                   full_name="Filt1", role=UserRole.student, password="pass1234"),
         db_session,
     )
     repo = UserRepository(db_session)
@@ -235,7 +235,7 @@ async def test_user_repository_get_active_users(db_session: AsyncSession):
     s = uid()
     await auth_service.register(
         UserCreate(email=f"active_{s}@test.com", username=f"active_{s}",
-                   full_name="Active User", role=UserRole.student, password="pass123"),
+                   full_name="Active User", role=UserRole.student, password="pass1234"),
         db_session,
     )
     repo = UserRepository(db_session)

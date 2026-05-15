@@ -19,7 +19,7 @@ async def get_top_courses(session: AsyncSession, limit: int = 10) -> list[dict]:
             func.avg(Enrollment.progress).label("avg_progress"),
         )
         .join(Enrollment, Enrollment.course_id == Course.id, isouter=True)
-        .where(Course.is_published == True)
+        .where(Course.is_published.is_(True))
         .group_by(Course.id, Course.title, Course.level, Course.price)
         .order_by(func.count(Enrollment.id).desc())
         .limit(limit)
@@ -40,7 +40,7 @@ async def get_top_courses(session: AsyncSession, limit: int = 10) -> list[dict]:
 
 async def get_student_progress(student_id: int, session: AsyncSession) -> dict:
     enrollments_result = await session.execute(
-        select(Enrollment).where(Enrollment.student_id == student_id, Enrollment.is_active == True)
+        select(Enrollment).where(Enrollment.student_id == student_id, Enrollment.is_active.is_(True))
     )
     enrollments = list(enrollments_result.scalars().all())
 
@@ -81,7 +81,7 @@ async def get_platform_overview(session: AsyncSession) -> dict:
     total_courses = total_courses_result.scalar_one()
 
     published_courses_result = await session.execute(
-        select(func.count(Course.id)).where(Course.is_published == True)
+        select(func.count(Course.id)).where(Course.is_published.is_(True))
     )
     published_courses = published_courses_result.scalar_one()
 
@@ -95,7 +95,7 @@ async def get_platform_overview(session: AsyncSession) -> dict:
     total_attempts = total_attempts_result.scalar_one()
 
     passed_attempts_result = await session.execute(
-        select(func.count(QuizAttempt.id)).where(QuizAttempt.passed == True)
+        select(func.count(QuizAttempt.id)).where(QuizAttempt.passed.is_(True))
     )
     passed_attempts = passed_attempts_result.scalar_one()
 
