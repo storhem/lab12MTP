@@ -251,3 +251,32 @@ conftest.py создан. Проблема: scope='session' для db_session к
 - Количество промптов: 2
 - Что пришлось исправлять вручную: ничего
 - Время: ~20 мин
+
+---
+
+## Задание В4 (доп): Замена AI-провайдера и улучшение README
+
+### Промпт 1
+
+**Инструмент:** Claude Code
+
+"У меня есть репозиторий FastAPI-проекта: https://github.com/storhem/lab12MTP (платформа онлайн-обучения, Python 3.11, SQLAlchemy 2.0 async, структура `src/app/`).
+
+Нужно выполнить три задачи:
+
+**1. Диагностика:** В GitHub-репозитории я не вижу директорию `src/app/core/`. Проверь, отслеживается ли она git-ом (`git ls-files src/app/core/`), или она исключена `.gitignore`-ом, или не была закоммичена. Объясни причину.
+
+**2. Замена AI-провайдера в CI/CD:** В файле `.github/workflows/ai_pr_review.yml` используется Anthropic Claude API. Замени его на Google Gemini API — ориентируйся на реализацию из репозитория https://github.com/Dev66-66/LAB12 (файл `.github/workflows/ai_review.yml`). Конкретно: поменяй эндпоинт, формат запроса/ответа, название секрета (`ANTHROPIC_API_KEY` → `GEMINI_API_KEY`), модель на `gemini-1.5-flash`.
+
+**3. Улучшение README.md:** Переработай `README.md`, взяв за образец структуру и стиль README из https://github.com/Dev66-66/LAB12. Добавь бейджи CI и покрытия тестов вверху файла, уточни инструкцию по получению `GEMINI_API_KEY` (бесплатно на aistudio.google.com).
+
+После изменений закоммить оба файла атомарным коммитом с понятным сообщением."
+
+Результат:
+Диагностика показала, что `src/app/core/` есть в git-е (`git ls-files` нашёл оба файла). Workflow переписан под Gemini 1.5 Flash: эндпоинт `generativelanguage.googleapis.com`, парсинг `candidates[0].content.parts[0].text`, секрет `GEMINI_API_KEY`. README дополнен тремя бейджами (CI, Coverage, Python) и инструкцией по настройке ключа.
+
+### Итого
+
+- Количество промптов: 1
+- Что пришлось исправлять вручную: ничего
+- Время: ~15 мин
