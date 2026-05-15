@@ -2,7 +2,8 @@
 
 **ФИО:** Евланичев Максим Юрьевич  
 **Группа:** 221131  
-**Лабораторная работа №12, Вариант 7**
+**Лабораторная работа №12, Вариант 7**  
+**Сложность:** повышенная
 
 [![CI](https://github.com/storhem/lab12MTP/actions/workflows/ci.yml/badge.svg)](https://github.com/storhem/lab12MTP/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-90%25%2B-brightgreen)](https://github.com/storhem/lab12MTP/actions/workflows/ci.yml)
