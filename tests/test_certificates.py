@@ -1,15 +1,18 @@
+import uuid
 import pytest
 from httpx import AsyncClient
 
+from app.models.user import UserRole
+from tests.conftest import create_user_in_db, get_auth_headers
+
 
 async def setup_completed_enrollment(client: AsyncClient, db_session) -> tuple[int, dict]:
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
+    s = uuid.uuid4().hex[:8]
 
     instr = await create_user_in_db(
         db_session,
-        f"cert_instr_{id(db_session)}@test.com",
-        f"cert_instr_{id(db_session)}",
+        f"cert_instr_{s}@test.com",
+        f"cert_instr_{s}",
         "Cert Instructor",
         UserRole.instructor,
     )
@@ -25,8 +28,8 @@ async def setup_completed_enrollment(client: AsyncClient, db_session) -> tuple[i
 
     student = await create_user_in_db(
         db_session,
-        f"cert_student_{id(db_session)}@test.com",
-        f"cert_student_{id(db_session)}",
+        f"cert_student_{s}@test.com",
+        f"cert_student_{s}",
         "Cert Student",
         UserRole.student,
     )
@@ -86,8 +89,6 @@ async def test_verify_certificate_invalid(test_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_get_my_certificates_empty(test_client: AsyncClient, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
 
     student = await create_user_in_db(
         db_session,
@@ -105,8 +106,6 @@ async def test_get_my_certificates_empty(test_client: AsyncClient, db_session):
 
 @pytest.mark.asyncio
 async def test_certificate_not_duplicated_on_second_completion(test_client: AsyncClient, db_session):
-    from tests.conftest import create_user_in_db, get_auth_headers
-    from app.models.user import UserRole
 
     instr = await create_user_in_db(
         db_session, "nodup_instr@test.com", "nodup_instr", "NoDup Instr", UserRole.instructor
