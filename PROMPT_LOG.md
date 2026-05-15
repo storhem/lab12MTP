@@ -145,9 +145,25 @@ Docker конфигурация создана. В CMD не было && межд
 Результат:  
 passlib 1.7.4 несовместим с bcrypt 4.1+: в 4.1.0 добавили strict enforcement 72-байтового лимита, а detect_wrap_bug() специально хеширует 120-байтовый пароль. Исправление: явно зафиксировать "bcrypt==4.0.1" в pyproject.toml. После этого CI стал зелёным.
 
+### Промпт 5 — Исправление UNIQUE constraint в test_certificates на Linux
+
+**Инструмент:** Claude Code
+
+"CI упал на тесте `test_verify_certificate_valid` с ошибкой:
+
+```
+sqlalchemy.exc.IntegrityError: UNIQUE constraint failed: users.email
+[parameters: ('cert_instr_139767883731024@test.com', ...)]
+```
+
+Локально все 119 тестов проходят (Windows 11, Python 3.13), в CI падает один тест (ubuntu-latest, Python 3.11). Суффикс в email формируется через `id(db_session)`. Найди причину и исправь так, чтобы суффиксы были гарантированно уникальны между разными тестовыми вызовами."
+
+Результат:  
+Корневая причина: `id()` возвращает адрес объекта в памяти. На Linux Python переиспользует освобождённые адреса — два разных теста (`test_certificate_issued_on_completion` и `test_verify_certificate_valid`) получали сессии с одинаковым `id()`, что давало идентичный email и UNIQUE constraint. Исправление: заменить `id(db_session)` на `uuid.uuid4().hex[:8]` в `setup_completed_enrollment`. Заодно вынесены импорты `create_user_in_db`, `get_auth_headers`, `UserRole` на уровень модуля.
+
 ### Итого
 
-- Количество промптов: 4
+- Количество промптов: 5
 - Что пришлось исправлять вручную: ничего, все исправления применял ИИ
 - Время: ~1.5 часа
 
