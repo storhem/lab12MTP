@@ -4,11 +4,15 @@
 **Группа:** 221131  
 **Лабораторная работа №12, Вариант 7**
 
+[![CI](https://github.com/storhem/lab12MTP/actions/workflows/ci.yml/badge.svg)](https://github.com/storhem/lab12MTP/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-90%25%2B-brightgreen)](https://github.com/storhem/lab12MTP/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
+
 ---
 
 ## Описание
 
-Веб-приложение "Платформа онлайн-обучения" — это REST API для управления курсами, уроками, тестами, записями на курсы и сертификатами. Платформа поддерживает три роли пользователей: студент, преподаватель и администратор.
+Веб-приложение "Платформа онлайн-обучения" — REST API для управления курсами, уроками, тестами, записями на курсы и сертификатами. Платформа поддерживает три роли пользователей: студент, преподаватель и администратор.
 
 ### Функциональность
 
@@ -46,6 +50,8 @@
 API (routers) → Services (бизнес-логика) → Repositories (доступ к БД) → Models (SQLAlchemy)
 ```
 
+HTTP-запросы проходят через роутеры FastAPI (валидация и аутентификация), затем через сервисный слой (бизнес-логика), репозиторный слой (CRUD-операции) и ORM-модели до PostgreSQL. Зависимости внедряются через механизм `Depends`.
+
 ```
 src/app/
 ├── api/v1/          # Роутеры FastAPI
@@ -60,7 +66,7 @@ src/app/
 ├── repositories/    # Работа с БД (CRUD)
 ├── models/          # SQLAlchemy модели
 ├── schemas/         # Pydantic схемы
-├── core/            # Конфигурация
+├── core/            # Конфигурация и зависимости
 ├── database.py      # Подключение к БД
 └── main.py          # Точка входа
 ```
@@ -88,7 +94,7 @@ POSTGRES_DB=learning_platform
 ### 1. Клонировать репозиторий
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/storhem/lab12MTP.git
 cd lab12MTP
 ```
 
@@ -384,7 +390,10 @@ Authorization: Bearer <token>
 
 Проект использует GitHub Actions:
 
-- **ci.yml** — запускает тесты при каждом push/PR, проверяет покрытие кода (минимум 90%)
-- **ai_pr_review.yml** — автоматический AI-обзор кода при открытии PR с помощью Claude API
+- **ci.yml** — запускает тесты при каждом push/PR, проверяет покрытие кода (минимум 90%), публикует отчёт о покрытии в комментарий PR
+- **ai_pr_review.yml** — автоматический AI-обзор кода при открытии PR с помощью Google Gemini API
 
-Для работы AI PR Review необходимо добавить секрет `ANTHROPIC_API_KEY` в настройках репозитория.
+### Настройка секретов
+
+Для работы AI PR Review добавьте секрет `GEMINI_API_KEY` в настройках репозитория.  
+Ключ можно получить бесплатно на [aistudio.google.com/apikey](https://aistudio.google.com/apikey).

@@ -23,7 +23,7 @@ jobs:
         run: |
           FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | head -30 | tr '\n' ',')
           echo "files=$FILES" >> $GITHUB_OUTPUT
-          DIFF=$(git diff origin/${{ github.base_ref }}...HEAD -- '*.py' | head -c 8000)
+          DIFF=$(git diff origin/${{ github.base_ref }}...HEAD -- '*.py' | head -c 6000)
           echo "diff<<EOF" >> $GITHUB_OUTPUT
           echo "$DIFF" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -31,7 +31,7 @@ jobs:
       - name: Generate AI PR Review
         id: ai-review
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_BODY="${{ github.event.pull_request.body }}"
@@ -44,7 +44,7 @@ jobs:
           PR Description: $PR_BODY
           Changed files: $CHANGED_FILES
 
-          Code diff (first 8000 chars):
+          Code diff (first 6000 chars):
           $DIFF_CONTENT
 
           Please provide a structured code review in Russian covering:
@@ -56,26 +56,26 @@ jobs:
           Be specific and constructive."
 
           RESPONSE=$(curl -s -X POST \
-            "https://api.anthropic.com/v1/messages" \
-            -H "x-api-key: $ANTHROPIC_API_KEY" \
-            -H "anthropic-version: 2023-06-01" \
-            -H "content-type: application/json" \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$GEMINI_API_KEY" \
+            -H "Content-Type: application/json" \
             -d "{
-              \"model\": \"claude-3-5-sonnet-20241022\",
-              \"max_tokens\": 1024,
-              \"messages\": [
-                {
-                  \"role\": \"user\",
-                  \"content\": $(echo "$PROMPT" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
-                }
-              ]
+              \"contents\": [{
+                \"parts\": [{
+                  \"text\": $(echo "$PROMPT" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+                }]
+              }]
             }")
 
           REVIEW_TEXT=$(echo "$RESPONSE" | python3 -c "
           import json, sys
           data = json.load(sys.stdin)
-          if 'content' in data and data['content']:
-              print(data['content'][0]['text'])
+          candidates = data.get('candidates', [])
+          if candidates:
+              parts = candidates[0].get('content', {}).get('parts', [])
+              if parts:
+                  print(parts[0].get('text', 'No text in response'))
+              else:
+                  print('AI review failed: no parts in response')
           else:
               print('AI review failed: ' + str(data.get('error', 'unknown error')))
           ")
@@ -88,12 +88,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          COMMENT_BODY="## 🤖 AI Code Review (Claude)
+          COMMENT_BODY="## 🤖 AI Code Review (Gemini)
 
           ${{ steps.ai-review.outputs.review }}
 
           ---
-          *Автоматический обзор кода с помощью Claude API*"
+          *Автоматический обзор кода с помощью Google Gemini API*"
 
           curl -s -X POST \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
